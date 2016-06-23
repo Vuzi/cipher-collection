@@ -1,59 +1,49 @@
 package fr.vuzi.cipher;
 
-import fr.vuzi.Utils;
-
 import java.io.*;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
-public class TranspositionCipher implements ICipher {
+/**
+ * Vigenere cipher implementation, on 'a' to 'z' character. Any other character will be ignored in both encoded
+ * and decode method and outputted directly
+ */
+public class VigenereCipher implements ICipher {
+
+    public int keySize = 10;
 
     @Override
-    public void encode(File message, File keyFile, File encodedMessage) throws IOException {
-        encode(readKey(keyFile), false, message, encodedMessage);
+    public void encode(File message, File key, File encodedMessage) throws IOException {
+        encode(readKey(key), message, encodedMessage);
     }
 
     @Override
     public void decode(File encodedMessage, File keyFile, File decodedMessage) throws IOException {
-        encode(readKey(keyFile), true, encodedMessage, decodedMessage);
+        int[] key = readKey(keyFile);
+
+        for(int i = 0; i < key.length; i++)
+            key[i] = 26 - key[i];
+
+        encode(key, encodedMessage, decodedMessage);
     }
 
-    private void encode(int[] key, boolean invert, File message, File encodedMessage) throws IOException {
-        char[] buffer = new char[key.length];
-
+    private void encode(int[] key, File message, File encodedMessage) throws IOException {
         Reader msgReader = new InputStreamReader(new FileInputStream(message));
         Writer msgWriter = new OutputStreamWriter(new FileOutputStream(encodedMessage));
 
-        int read;
-        while ((read = msgReader.read(buffer)) != -1) {
-            // Need padding
-            if(read < buffer.length)
-                for(int i = read; i < buffer.length; i++)
-                    buffer[i] = ' '; // Padding
-
-            // Transpose...
-            if(invert) {
-                for(int i = key.length - 1 ; i >= 0; i--) {
-                    char tmp = buffer[i];
-                    buffer[i] = buffer[key[i]];
-                    buffer[key[i]] = tmp;
-                }
-            } else {
-                for(int i = 0; i < key.length; i++) {
-                    char tmp = buffer[i];
-                    buffer[i] = buffer[key[i]];
-                    buffer[key[i]] = tmp;
-                }
-            }
-
-            msgWriter.write(buffer);
+        int c, i = 0;
+        while ((c = msgReader.read()) != -1) {
+            if(c >= 'a' && c <= 'z')
+                c = ((c - 'a' + key[i % key.length]) % 26) + 'a';
+            i++;
+            msgWriter.write(c);
         }
 
         msgWriter.close();
         msgReader.close();
     }
-
-    public int keySize = 26;
 
     public int getKeySize() {
         return keySize;
@@ -66,12 +56,10 @@ public class TranspositionCipher implements ICipher {
     @Override
     public void generateKey(File keyFile) throws IOException {
         int[] key = new int[keySize];
+        Random random = new SecureRandom();
 
         for(int i = 0; i < key.length; i++)
-            key[i] = i;
-
-        // Shuffle the key
-        Utils.shuffle(key);
+            key[i] = random.nextInt(26);
 
         // Write the key
         Writer keyWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(keyFile)));

@@ -8,7 +8,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Cesar cipher implementation, on 'a' to 'z' character. Any other character will be ignored in both encoded
+ * and decode method and outputted directly
+ */
 public class CaesarCipher implements ICipher {
+
     @Override
     public void encode(File message, File key, File encodedMessage) throws IOException {
         encode(readKey(key), message, encodedMessage);
@@ -34,6 +39,15 @@ public class CaesarCipher implements ICipher {
         msgReader.close();
     }
 
+    /**
+     * Try to find the key using a dictionary attack and testing all the possible key, and using the key
+     * with the most matches
+     *
+     * @param dictionary The dictionary file
+     * @param message The message
+     * @return The found key
+     * @throws IOException
+     */
     public int guessKey(File dictionary, File message) throws IOException {
         BufferedReader msgReader = new BufferedReader(new InputStreamReader(new FileInputStream(dictionary)));
 
