@@ -10,14 +10,22 @@ public class Main {
     public static void main(String[] args) {
 
         try {
-            ICipher cipher = new VigenereCipher();
+            VigenereCipher cipher = new VigenereCipher();
 
-            cipher.generateKey(new File("key.txt"));
+            //cipher.setKeySize(5);
+            //cipher.generateKey(new File("key.txt"));
 
             //((TranspositionCipher) cipher).readKey(new File("key.txt"));
 
-            cipher.encode(new File("msg.txt"), new File("key.txt"), new File("encoded.txt"));
-            cipher.decode(new File("encoded.txt"), new File("key.txt"), new File("msg2.txt"));
+            //cipher.encode(new File("candide.txt"), new File("key.txt"), new File("encoded.txt"));
+
+            //int keySize = cipher.guessKeySize(new File("encoded.txt"));
+
+            //System.out.println("key => " + keySize);
+
+            cipher.guessKey(new File("encoded.txt"), new File("key_guess.txt"));
+
+            cipher.decode(new File("encoded.txt"), new File("key_guess.txt"), new File("msg2.txt"));
 
             /*
             ICipher cipher = new CaesarCipher();

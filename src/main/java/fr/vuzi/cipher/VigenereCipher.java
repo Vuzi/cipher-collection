@@ -1,10 +1,10 @@
 package fr.vuzi.cipher;
 
+import fr.vuzi.Utils;
+
 import java.io.*;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Vigenere cipher implementation, on 'a' to 'z' character. Any other character will be ignored in both encoded
@@ -29,20 +29,99 @@ public class VigenereCipher implements ICipher {
         encode(key, encodedMessage, decodedMessage);
     }
 
+    /**
+     * Encode the provided message
+     *
+     * @param key Key to use
+     * @param message Message to encode
+     * @param encodedMessage Message to decode to
+     * @throws IOException
+     */
     private void encode(int[] key, File message, File encodedMessage) throws IOException {
         Reader msgReader = new InputStreamReader(new FileInputStream(message));
         Writer msgWriter = new OutputStreamWriter(new FileOutputStream(encodedMessage));
 
         int c, i = 0;
         while ((c = msgReader.read()) != -1) {
-            if(c >= 'a' && c <= 'z')
+            if(c >= 'a' && c <= 'z') {
                 c = ((c - 'a' + key[i % key.length]) % 26) + 'a';
-            i++;
+                i++;
+            } else if(c >= 'A' && c <= 'Z') {
+                c = ((c - 'A' + key[i % key.length]) % 26) + 'A';
+                i++;
+            }
             msgWriter.write(c);
         }
 
         msgWriter.close();
         msgReader.close();
+    }
+
+    /**
+     * Guess the key size based on the provided text
+     *
+     * @param text Text use to guess the key
+     * @return The key size
+     * @throws IOException
+     */
+    public int guessKeySize(String text) throws IOException {
+        Map<String, List<Integer>> groups = new HashMap<>();
+        int[] possibleSizes = new int[] { 3, 5, 7, 11 };
+
+        for(int size : possibleSizes) {
+            for(int offset = 0; offset < text.length() - size; offset++) {
+                String toSearch = text.substring(offset, size + offset);
+
+                // Add to groups
+                List<Integer> indexes = new ArrayList<>();
+
+                int searchOffset = 0;
+                while(searchOffset < text.length() - size) {
+                    int foundIndex = text.indexOf(toSearch, searchOffset);
+
+                    if(foundIndex < 0)
+                        break;
+
+                    // TODO
+                    indexes.add(foundIndex);
+
+                    searchOffset = foundIndex + size;
+                }
+
+                // Add to map
+                groups.put(toSearch, indexes);
+            }
+        }
+
+        int[] values = new int[possibleSizes.length];
+        for(Map.Entry<String, List<Integer>> entry : groups.entrySet()) {
+            if(entry.getValue().size() <= 1)
+                continue;
+
+            int globalOffset = entry.getValue().get(0);
+
+            for(int i = 1; i < entry.getValue().size(); i++) {
+                int difference = entry.getValue().get(i) - globalOffset;
+
+                for(int j = 0; j < possibleSizes.length; j++) {
+                    if((difference % possibleSizes[j]) == 0) {
+                        values[j]++;
+                    }
+                }
+
+                globalOffset += difference + entry.getKey().length();
+            }
+        }
+
+        int max = Integer.MIN_VALUE, value = 0;
+        for (int i = 0; i < values.length; i++) {
+            if(values[i] > max) {
+                max = values[i];
+                value = possibleSizes[i];
+            }
+        }
+
+        return value;
     }
 
     public int getKeySize() {
@@ -61,6 +140,11 @@ public class VigenereCipher implements ICipher {
         for(int i = 0; i < key.length; i++)
             key[i] = random.nextInt(26);
 
+        // Write the key
+        writeKey(key, keyFile);
+    }
+
+    private void writeKey(int[] key, File keyFile) throws IOException {
         // Write the key
         Writer keyWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(keyFile)));
         for(int keyElement : key) {
@@ -94,4 +178,49 @@ public class VigenereCipher implements ICipher {
 
         return key;
     }
+
+    /**
+     * Guess the key based on the provided text
+     *
+     * @param textFile File used to guess the key
+     * @param keyFile Where to write the key
+     * @throws IOException
+     */
+    public void guessKey(File textFile, File keyFile) throws IOException {
+        String text = Utils.readFile(textFile).toLowerCase().replaceAll("[^a-z]+", "");
+        int keySize = guessKeySize(text);
+
+        System.out.println("key => " + keySize);
+
+        int[] key = new int[keySize];
+
+        for (int i = 0; i < keySize; i++) {
+            Map<Character, Integer> frequencies = new HashMap<>();
+
+            for (int j = i; j < text.length(); j += keySize) {
+                char c = text.charAt(j);
+                Integer frequency = frequencies.get(c);
+
+                frequencies.put(c, frequency != null ? frequency + 1 : 1);
+            }
+
+            char c = '-';
+            int max = Integer.MIN_VALUE;
+            for (Map.Entry<Character, Integer> entry : frequencies.entrySet()) {
+                if(entry.getValue() > max) {
+                    max = entry.getValue();
+                    c = entry.getKey();
+                }
+            }
+
+            int dec = c - 'e';
+            while(dec < 0)
+                dec += 26;
+
+            key[i] = dec;
+        }
+
+        writeKey(key, keyFile);
+    }
+
 }

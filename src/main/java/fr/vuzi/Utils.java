@@ -32,12 +32,13 @@ public class Utils {
         return s;
     }
 
-    public final static double[] englishFrequencies =
-            {0.08167, 0.01492, 0.02782, 0.04253, 0.12702, 0.02228,
+    public final static double[] englishFrequencies = {
+             0.08167, 0.01492, 0.02782, 0.04253, 0.12702, 0.02228,
              0.02015, 0.06094, 0.06966, 0.00153, 0.00772, 0.04025,
              0.02406, 0.06749, 0.07507, 0.01929, 0.00095, 0.05987,
              0.06327, 0.09056, 0.02758, 0.00978, 0.02360, 0.00150,
-             0.01974,0.00074};
+             0.01974,0.00074
+        };
 
     public static double getEntropy(String str) {
 
@@ -146,5 +147,20 @@ public class Utils {
         }
 
         return toInvert;
+    }
+
+    public static String lcs(String a, String b){
+        int aLen = a.length();
+        int bLen = b.length();
+        if(aLen == 0 || bLen == 0){
+            return "";
+        }else if(a.charAt(aLen-1) == b.charAt(bLen-1)){
+            return lcs(a.substring(0,aLen-1),b.substring(0,bLen-1))
+                    + a.charAt(aLen-1);
+        }else{
+            String x = lcs(a, b.substring(0,bLen-1));
+            String y = lcs(a.substring(0,aLen-1), b);
+            return (x.length() > y.length()) ? x : y;
+        }
     }
 }
