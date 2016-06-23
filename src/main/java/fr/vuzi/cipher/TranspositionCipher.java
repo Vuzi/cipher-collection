@@ -10,15 +10,15 @@ public class TranspositionCipher implements ICipher {
 
     @Override
     public void encode(File message, File keyFile, File encodedMessage) throws IOException {
-        encode(readKey(keyFile), message, encodedMessage);
+        encode(readKey(keyFile), false, message, encodedMessage);
     }
 
     @Override
     public void decode(File encodedMessage, File keyFile, File decodedMessage) throws IOException {
-        encode(readKey(keyFile), encodedMessage, decodedMessage);
+        encode(readKey(keyFile), true, encodedMessage, decodedMessage);
     }
 
-    private void encode(int[] key, File message, File encodedMessage) throws IOException {
+    private void encode(int[] key, boolean invert, File message, File encodedMessage) throws IOException {
         char[] buffer = new char[key.length];
 
         Reader msgReader = new InputStreamReader(new FileInputStream(message));
@@ -32,10 +32,18 @@ public class TranspositionCipher implements ICipher {
                     buffer[i] = ' '; // Padding
 
             // Transpose...
-            for(int i = 0; i < key.length; i++) {
-                char tmp = buffer[i];
-                buffer[i] = buffer[key[i]];
-                buffer[key[i]] = tmp;
+            if(invert) {
+                for(int i = key.length - 1 ; i >= 0; i--) {
+                    char tmp = buffer[i];
+                    buffer[i] = buffer[key[i]];
+                    buffer[key[i]] = tmp;
+                }
+            } else {
+                for(int i = 0; i < key.length; i++) {
+                    char tmp = buffer[i];
+                    buffer[i] = buffer[key[i]];
+                    buffer[key[i]] = tmp;
+                }
             }
 
             msgWriter.write(buffer);
@@ -64,7 +72,7 @@ public class TranspositionCipher implements ICipher {
             key[i] = i;
 
         // Shuffle the key
-        Utils.shuffe(key);
+        Utils.shuffle(key);
 
         // Write the key
         Writer keyWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(keyFile)));

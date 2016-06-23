@@ -3,7 +3,6 @@ package fr.vuzi.cipher;
 import fr.vuzi.Utils;
 
 import java.io.*;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -150,7 +149,7 @@ public class HomophonicSubstitutionCipher implements ICipher {
             keyAlphabet[i] = i;
 
         // Shuffle the alphabet
-        Utils.shuffe(keyAlphabet);
+        Utils.shuffle(keyAlphabet);
 
         // Create the key
         Map<Character, List<Integer>> key = new HashMap<>();

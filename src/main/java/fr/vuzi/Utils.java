@@ -99,7 +99,7 @@ public class Utils {
         return freq;
     }
 
-    public static <T> T[] shuffe(T[] toShuffle) {
+    public static <T> T[] shuffle(T[] toShuffle) {
 
         SecureRandom random = new SecureRandom();
         for(int i = 0; i < toShuffle.length - 1 ; i++){
@@ -112,7 +112,7 @@ public class Utils {
         return toShuffle;
     }
 
-    public static char[] shuffe(char[] toShuffle) {
+    public static char[] shuffle(char[] toShuffle) {
 
         SecureRandom random = new SecureRandom();
         for(int i = 0; i < toShuffle.length - 1 ; i++){
@@ -125,7 +125,7 @@ public class Utils {
         return toShuffle;
     }
 
-    public static int[] shuffe(int[] toShuffle) {
+    public static int[] shuffle(int[] toShuffle) {
 
         SecureRandom random = new SecureRandom();
         for(int i = 0; i < toShuffle.length - 1 ; i++){
@@ -136,5 +136,15 @@ public class Utils {
         }
 
         return toShuffle;
+    }
+
+    public static int[] invert(int[] toInvert) {
+        for(int i = 0; i < toInvert.length / 2; i++) {
+            int temp = toInvert[i];
+            toInvert[i] = toInvert[toInvert.length - i - 1];
+            toInvert[toInvert.length - i - 1] = temp;
+        }
+
+        return toInvert;
     }
 }

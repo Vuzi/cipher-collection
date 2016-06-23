@@ -17,7 +17,7 @@ public class Main {
             //((TranspositionCipher) cipher).readKey(new File("key.txt"));
 
             cipher.encode(new File("msg.txt"), new File("key.txt"), new File("encoded.txt"));
-            //cipher.decode(new File("encoded.txt"), new File("key.txt"), new File("msg2.txt"));
+            cipher.decode(new File("encoded.txt"), new File("key.txt"), new File("msg2.txt"));
 
             /*
             ICipher cipher = new CaesarCipher();
