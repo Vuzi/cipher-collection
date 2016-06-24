@@ -31,7 +31,7 @@ public class VernamCipher implements ICipher {
         encode(encodedMessage, key, decodedMessage);
     }
 
-    int keySize = 0;
+    private int keySize = 0;
 
     public int getKeySize() {
         return keySize;

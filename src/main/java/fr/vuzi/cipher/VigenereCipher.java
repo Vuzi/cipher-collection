@@ -66,34 +66,41 @@ public class VigenereCipher implements ICipher {
      */
     public int guessKeySize(String text) throws IOException {
         Map<String, List<Integer>> groups = new HashMap<>();
-        int[] possibleSizes = new int[] { 3, 5, 7, 11 };
+        int maxKeySize = 26;
 
-        for(int size : possibleSizes) {
-            for(int offset = 0; offset < text.length() - size; offset++) {
+        for(int size = 2; size <= text.length() / 2; size++) {
+            boolean cont = false;
+            for(int offset = 0; offset < text.length() - size; offset++, cont = false) {
                 String toSearch = text.substring(offset, size + offset);
+
+                if(groups.containsKey(toSearch))
+                    continue;
 
                 // Add to groups
                 List<Integer> indexes = new ArrayList<>();
 
-                int searchOffset = 0;
+                int searchOffset = offset;
                 while(searchOffset < text.length() - size) {
                     int foundIndex = text.indexOf(toSearch, searchOffset);
 
                     if(foundIndex < 0)
                         break;
 
-                    // TODO
                     indexes.add(foundIndex);
 
                     searchOffset = foundIndex + size;
+                    cont = true;
                 }
 
                 // Add to map
                 groups.put(toSearch, indexes);
+
+                if(!cont)
+                    break;
             }
         }
 
-        int[] values = new int[possibleSizes.length];
+        int[] values = new int[maxKeySize];
         for(Map.Entry<String, List<Integer>> entry : groups.entrySet()) {
             if(entry.getValue().size() <= 1)
                 continue;
@@ -103,8 +110,8 @@ public class VigenereCipher implements ICipher {
             for(int i = 1; i < entry.getValue().size(); i++) {
                 int difference = entry.getValue().get(i) - globalOffset;
 
-                for(int j = 0; j < possibleSizes.length; j++) {
-                    if((difference % possibleSizes[j]) == 0) {
+                for(int j = values.length - 1; j >= 2; j--) {
+                    if((difference % j) == 0) {
                         values[j]++;
                     }
                 }
@@ -117,7 +124,7 @@ public class VigenereCipher implements ICipher {
         for (int i = 0; i < values.length; i++) {
             if(values[i] > max) {
                 max = values[i];
-                value = possibleSizes[i];
+                value = i;
             }
         }
 
@@ -189,8 +196,6 @@ public class VigenereCipher implements ICipher {
     public void guessKey(File textFile, File keyFile) throws IOException {
         String text = Utils.readFile(textFile).toLowerCase().replaceAll("[^a-z]+", "");
         int keySize = guessKeySize(text);
-
-        System.out.println("key => " + keySize);
 
         int[] key = new int[keySize];
 
