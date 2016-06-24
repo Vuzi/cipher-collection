@@ -10,43 +10,24 @@ public class Main {
     public static void main(String[] args) {
 
         try {
-            VigenereCipher cipher = new VigenereCipher();
+            File message = new File("test.jpg");
+            File messageEncoded = new File("image.jpg.bin");
+            File messageDecoded = new File("test2.jpg");
+            File key = new File("key.bin");
 
-            //cipher.setKeySize(5);
-            //cipher.generateKey(new File("key.txt"));
+            VernamCipher cipher = new VernamCipher();
 
-            //((TranspositionCipher) cipher).readKey(new File("key.txt"));
+            cipher.setKeySize((int) message.length());
+            cipher.generateKey(key);
 
-            //cipher.encode(new File("candide.txt"), new File("key.txt"), new File("encoded.txt"));
-
-            //int keySize = cipher.guessKeySize(new File("encoded.txt"));
-
-            //System.out.println("key => " + keySize);
-
-            cipher.guessKey(new File("encoded.txt"), new File("key_guess.txt"));
-
-            cipher.decode(new File("encoded.txt"), new File("key_guess.txt"), new File("msg2.txt"));
-
-            /*
-            ICipher cipher = new CaesarCipher();
-
-            cipher.generateKey(new File("key.txt"));
-
-            cipher.encode(new File("msg.txt"), new File("key.txt"), new File("encoded.txt"));
-            cipher.decode(new File("encoded.txt"), new File("key.txt"), new File("msg2.txt"));*/
+            cipher.encode(message, key, messageEncoded);
+            cipher.decode(messageEncoded, key, messageDecoded);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        /*
-        try {
-            testSubstitutionCipher();
-            testSubstitutionCipher2();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
 
-/*
+        /*
         String textFreq = "";
 
         // Generate the target frequencies
